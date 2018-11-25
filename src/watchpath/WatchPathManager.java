@@ -20,6 +20,8 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Object for creating {@link WatchPath} objects.
@@ -220,7 +222,7 @@ public class WatchPathManager {
            while (!fin) {
                try {
                     for (WatchService ws: FS2WatchService.values()) {
-                        while ((key = ws.poll(polling_Time, TimeUnit.MILLISECONDS)) != null) {
+                        while ((key = ws.poll()) != null) {
                             if (key.isValid()){
                                 for (final WatchEvent event : key.pollEvents()) {
                                     final WatchEvent.Kind<?> kind = event.kind();
@@ -256,8 +258,11 @@ public class WatchPathManager {
                             }
                         }
                     }
+                    Thread.sleep(polling_Time);
                     pollNonExistingFiles();
-               } catch (Exception ex) {  }
+               } catch (Exception ex) { 
+                   Logger.getLogger(getClass().getName()).log(Level.SEVERE, ex.getMessage(), ex);
+               }
            }
         }
         
